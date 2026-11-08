@@ -422,7 +422,7 @@ public enum TopShelfFeedStore {
         init(_ style: TopShelfConfiguration.Style) {
             switch style {
             case .carouselDetails, .carouselActions: self = .carousel
-            case .rows: self = .card
+            case .rows, .featuredCards: self = .card
             case .posters: self = .poster
             }
         }
@@ -543,7 +543,13 @@ public enum TopShelfFeedStore {
                     TopShelfRatingsStore.write(ratings, in: container)
                 }
             }
-            await cacheArtwork(for: displayed, kind: ArtworkKind(configuration.style), ratings: ratings, scale: scale)
+            if configuration.style == .featuredCards {
+                let sections = TopShelfComposer.featuredSections(from: rows)
+                await cacheArtwork(for: sections.first?.entries ?? [], kind: .card, ratings: ratings, scale: scale)
+                await cacheArtwork(for: sections.dropFirst().flatMap(\.entries), kind: .poster, ratings: ratings, scale: scale)
+            } else {
+                await cacheArtwork(for: displayed, kind: ArtworkKind(configuration.style), ratings: ratings, scale: scale)
+            }
             #endif
             TopShelfArtworkPruner.prune(in: container)
             notifyTopShelfContentChanged()

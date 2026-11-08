@@ -45,6 +45,16 @@ final class TopShelfContentProvider: TVTopShelfContentProvider {
                     for: slots.map(\.entry), in: TopShelfFeedStore.containerURL)
                 completionHandler(Self.carousel(slots, configuration: configuration, ratings: ratings, trailers: trailers))
             }
+        case .featuredCards:
+            let sections = TopShelfComposer.featuredSections(from: rows)
+            let collections = sections.enumerated().map { index, row in
+                let collection = TVTopShelfItemCollection(items: row.entries.map {
+                    Self.sectionedItem(for: $0, rowID: row.id, poster: index != 0)
+                })
+                collection.title = row.title ?? Self.fallbackTitles[row.section]
+                return collection
+            }
+            completionHandler(TVTopShelfSectionedContent(sections: collections))
         case .rows, .posters:
             let posters = configuration.style == .posters
             let collections = rows.map { row -> TVTopShelfItemCollection<TVTopShelfSectionedItem> in

@@ -48,7 +48,7 @@ let signingXCConfig: Path = .relativeToManifest("Configurations/Signing.xcconfig
 
 // MARK: - Shared values
 
-let bundleID = "com.pyksel.nuviotvos"
+let bundleID = Environment.nuvioTvBundleId.getString(default: "com.pyksel.nuviotvos")
 let marketingVersion = "3.5.0"
 let projectVersion = "81"
 // LibTrueHD 3.0.0 requires tvOS 18; APAC rendering itself is gated to tvOS 26+.
@@ -61,6 +61,7 @@ let tvOSDeployment = "18.0"
 // and are not repeated here.
 
 let projectBaseSettings: SettingsDictionary = [
+    "NUVIO_TV_APP_BUNDLE_IDENTIFIER": .string(bundleID),
     "ALWAYS_SEARCH_USER_PATHS": "NO",
     "CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED": "YES",
     "CLANG_CXX_LANGUAGE_STANDARD": "c++20",

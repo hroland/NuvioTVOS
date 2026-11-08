@@ -1,5 +1,22 @@
 import Foundation
 
+/// Visibility of episode/status labels on focusable in-app cards.
+public enum CardLabelVisibility: String, CaseIterable, Sendable {
+    case always, focused, hidden
+
+    public func isVisible(isFocused: Bool) -> Bool {
+        self == .always || (self == .focused && isFocused)
+    }
+
+    public var label: String {
+        switch self {
+        case .always: return "Always"
+        case .focused: return "Focused Only"
+        case .hidden: return "Hidden"
+        }
+    }
+}
+
 // MARK: - Top Shelf layout
 //
 // What the Apple TV home screen shows for the app: which mirrored sections and
@@ -55,6 +72,7 @@ public struct TopShelfConfiguration: Codable, Equatable, Sendable {
         }
     }
 
+    public var showsEpisodeLabels: Bool
     public var isEnabled: Bool
     /// Nil preserves the advanced multi-source layout; otherwise mirrors one Home row.
     public var homeScreenRowID: String?
@@ -81,6 +99,7 @@ public struct TopShelfConfiguration: Codable, Equatable, Sendable {
     public var shufflesUpNext: Bool
 
     public init(
+        showsEpisodeLabels: Bool = false,
         isEnabled: Bool = true,
         homeScreenRowID: String? = nil,
         style: Style = .carouselDetails,
@@ -96,6 +115,7 @@ public struct TopShelfConfiguration: Codable, Equatable, Sendable {
         librarySource: LibrarySource = .active,
         shufflesUpNext: Bool = false
     ) {
+        self.showsEpisodeLabels = showsEpisodeLabels
         self.isEnabled = isEnabled
         self.homeScreenRowID = homeScreenRowID
         self.style = style
@@ -116,7 +136,7 @@ public struct TopShelfConfiguration: Codable, Equatable, Sendable {
         homeScreenRowID: TopShelfSection.continueWatching.rawValue, style: .featuredCards)
 
     private enum CodingKeys: String, CodingKey {
-        case isEnabled, homeScreenRowID
+        case isEnabled, homeScreenRowID, showsEpisodeLabels
         case style, includesContinueWatching, includesUpNext, mergesUpNext, includesToday, includesLibrary
         case catalogRowIDs, playsTrailers, starringLabel, directorLabel
         case librarySource, shufflesUpNext
@@ -128,6 +148,7 @@ public struct TopShelfConfiguration: Codable, Equatable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         if container.allKeys.isEmpty { self = .default; return }
         let fallback = TopShelfConfiguration.default
+        showsEpisodeLabels = (try? container.decodeIfPresent(Bool.self, forKey: .showsEpisodeLabels)) ?? false
         isEnabled = (try? container.decodeIfPresent(Bool.self, forKey: .isEnabled)) ?? true
         // Preserve saved multi-source preferences; new installations use .default.
         homeScreenRowID = (try? container.decodeIfPresent(String.self, forKey: .homeScreenRowID)) ?? nil

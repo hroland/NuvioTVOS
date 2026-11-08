@@ -166,6 +166,7 @@ enum SettingsKey {
     static let heroCatalogs = "nuvio.tv.settings.layout.heroCatalogs"
     static let fullscreenHeroBackdrop = "nuvio.tv.settings.layout.fullscreenHeroBackdrop"
     static let homeHeroRatingSource = "nuvio.tv.settings.layout.homeHeroRatingSource"
+    static let continueWatchingLabels = "nuvio.tv.settings.layout.continueWatchingLabels"
     static let posterLabels = "nuvio.tv.settings.layout.posterLabels"
     static let catalogAddonNames = "nuvio.tv.settings.layout.catalogAddonNames"
     static let landscapePosters = "nuvio.tv.settings.layout.landscapePosters"
@@ -421,7 +422,7 @@ enum SettingsKey {
         profileName, profilePinEnabled, profileAutoSelectLast, profileRequireSelectionAfterBackground,
         accountSyncWatchState,
         theme, bodyColor, font, language, amoled, amoledSurfaces, reduceMotion,
-        homeLayout, sidebarClockFormat, gridRows, catalogAutoRefreshInterval, homeCatalogShowType, heroEnabled, heroCatalogs, fullscreenHeroBackdrop, homeHeroRatingSource, posterLabels, catalogAddonNames, landscapePosters, customPosterURLPattern, customPosterEnabledScreens, discoverLocation,
+        homeLayout, sidebarClockFormat, gridRows, catalogAutoRefreshInterval, homeCatalogShowType, heroEnabled, heroCatalogs, fullscreenHeroBackdrop, homeHeroRatingSource, posterLabels, continueWatchingLabels, catalogAddonNames, landscapePosters, customPosterURLPattern, customPosterEnabledScreens, discoverLocation,
         searchStyle, preferAddonArtworkInSearch,
         continueWatchingVisible, continueWatchingLandscape, continueWatchingSort, upNextFromFurthestEpisode, showUnairedNextUp, continueWatchingEpisodeRatings, continueWatchingBlurNextUp,
         showCalendarTab, showWatchPartyTab, homeCalendarToday, calendarFilter, calendarHideSpoilers, calendarCheckAvailability, calendarTvmazeTimes,
@@ -3998,6 +3999,7 @@ private struct LayoutDiscoverySettingsView: View {
     @AppStorage(SettingsKey.fullscreenHeroBackdrop) private var fullscreenHeroBackdrop = true
     @AppStorage(SettingsKey.homeHeroRatingSource) private var homeHeroRatingSource = "imdb"
     @AppStorage(SettingsKey.posterLabels) private var posterLabels = false
+    @AppStorage(SettingsKey.continueWatchingLabels) private var continueWatchingLabels = CardLabelVisibility.focused.rawValue
     @AppStorage(SettingsKey.catalogAddonNames) private var catalogAddonNames = true
     @AppStorage(SettingsKey.landscapePosters) private var landscapePosters = false
     @AppStorage(SettingsKey.discoverLocation) private var discoverLocation = "Search"
@@ -4150,6 +4152,16 @@ private struct LayoutDiscoverySettingsView: View {
                 )
                 .opacity(heroEnabled ? 1 : 0.46)
                 .disabled(!heroEnabled)
+
+                SettingsOptionRow(
+                    title: L10n.string("tvos_layout_continue_labels", fallback: "Continue Watching Labels"),
+                    subtitle: L10n.string("tvos_layout_continue_labels_subtitle",
+                                          fallback: "When episode, time-left, and next-up labels appear on cards"),
+                    selection: $continueWatchingLabels,
+                    options: CardLabelVisibility.allCases.map(\.rawValue),
+                    accentColor: accentColor,
+                    optionLabel: { CardLabelVisibility(rawValue: $0)?.label ?? $0 }
+                )
 
                 SettingsToggleRow(
                     title: L10n.string("tvos_layout_poster_labels", fallback: "Poster Labels"),
@@ -4749,6 +4761,17 @@ private struct TopShelfSettingsGroup: View {
             )
 
             if configuration.isEnabled {
+                SettingsToggleRow(
+                    title: L10n.string("tvos_settings_topshelf_episode_labels", fallback: "Episode & Time Labels"),
+                    subtitle: L10n.string("tvos_settings_topshelf_episode_labels_subtitle",
+                                          fallback: "Show episode and time-left labels on Home Screen artwork"),
+                    isOn: Binding(
+                        get: { configuration.showsEpisodeLabels },
+                        set: { show in update { $0.showsEpisodeLabels = show } }
+                    ),
+                    accentColor: accentColor
+                )
+
                 SettingsOptionRow(
                     title: L10n.string("tvos_settings_topshelf_home_row", fallback: "Home Screen Row"),
                     subtitle: L10n.string(

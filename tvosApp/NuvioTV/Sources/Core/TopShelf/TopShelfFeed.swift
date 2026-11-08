@@ -569,6 +569,16 @@ public enum TopShelfFeedStore {
             ?? existingArtwork(named: entry.carouselArtworkFileName)
     }
 
+    /// Hidden labels use the original artwork, never an already-decorated cache
+    /// file. Top Shelf does not offer a per-focus artwork overlay callback.
+    public static func sectionedArtworkURL(
+        for entry: TopShelfEntry, poster: Bool, showsEpisodeLabels: Bool
+    ) -> URL? {
+        let original = (poster ? entry.posterSourceURL : entry.cardSourceURL).flatMap(URL.init(string:))
+        guard showsEpisodeLabels else { return original }
+        return (poster ? posterArtworkURL(for: entry) : artworkURL(for: entry)) ?? original
+    }
+
     /// Resolves the rendered 2:3 poster with its episode/time pill.
     public static func posterArtworkURL(for entry: TopShelfEntry) -> URL? {
         existingArtwork(named: posterArtworkName(for: entry))

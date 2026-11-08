@@ -74,6 +74,31 @@ final class TopShelfHomeCardsTests: XCTestCase {
         XCTAssertEqual(TopShelfConfigurationStore.migratingUntouchedDefaults(disabled, data: newData), disabled)
     }
 
+    func testInAppLabelsFollowFocusAndHiddenAlwaysWins() {
+        XCTAssertTrue(CardLabelVisibility.always.isVisible(isFocused: false))
+        XCTAssertTrue(CardLabelVisibility.always.isVisible(isFocused: true))
+        XCTAssertFalse(CardLabelVisibility.focused.isVisible(isFocused: false))
+        XCTAssertTrue(CardLabelVisibility.focused.isVisible(isFocused: true))
+        XCTAssertFalse(CardLabelVisibility.hidden.isVisible(isFocused: false))
+        XCTAssertFalse(CardLabelVisibility.hidden.isVisible(isFocused: true))
+    }
+
+    func testTopShelfLabelsDefaultToHiddenAndUseOriginalArtwork() throws {
+        XCTAssertFalse(TopShelfConfiguration.default.showsEpisodeLabels)
+        let entry = TopShelfEntry(contentId: "show", contentType: "series", title: "Show",
+            subtitle: "S4 E15 · 15m left", imageURL: "https://example.com/poster.jpg",
+            backdropURL: "https://example.com/backdrop.jpg", progress: 0.5, action: .details)
+        XCTAssertEqual(TopShelfFeedStore.sectionedArtworkURL(for: entry, poster: true,
+            showsEpisodeLabels: false)?.absoluteString, entry.posterSourceURL)
+        XCTAssertEqual(TopShelfFeedStore.sectionedArtworkURL(for: entry, poster: false,
+            showsEpisodeLabels: false)?.absoluteString, entry.cardSourceURL)
+        var configuration = TopShelfConfiguration.default
+        configuration.showsEpisodeLabels = true
+        let decoded = try JSONDecoder().decode(TopShelfConfiguration.self,
+            from: JSONEncoder().encode(configuration))
+        XCTAssertTrue(decoded.showsEpisodeLabels)
+    }
+
     private func makeFeeds() -> [TopShelfSection: TopShelfFeed] {
         [
             .continueWatching: TopShelfFeed(entries: entries("cw", count: 4), title: "Continue Watching"),

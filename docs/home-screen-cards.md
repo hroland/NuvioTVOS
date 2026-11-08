@@ -8,6 +8,12 @@ The row picker mirrors the actual cached Home rows, including installed catalog 
 
 Turning cards off returns the static Top Shelf artwork and cancels future Top Shelf background refresh requests. Saved row/style choices remain available when cards are enabled again. Updates migrate untouched old defaults to Continue Watching cards while preserving customized old layouts.
 
+## Episode and time-left labels
+
+**Settings → Layout → Continue Watching Labels** offers **Always**, **Focused Only** (default), and **Hidden** for in-app episode/status pills and episode-summary text. Title artwork and playback-progress bars remain visible.
+
+**Settings → General → Top Shelf → Episode & Time Labels** controls labels on the Apple TV Home Screen and defaults to off. Top Shelf's sectioned-content API supplies static images without an app focus callback, so a focused-only pill is not offered there. With labels off, the extension requests original card/poster artwork instead of reusing images with baked-in labels; carousel episode/time context is hidden too.
+
 ## Signing a personal build
 
 The app and TopShelf extension must share **the same** provisioned App Group. Using `group.$(PRODUCT_BUNDLE_IDENTIFIER)` independently in both targets creates two different groups because the extension bundle ID ends in `.TopShelf`.
